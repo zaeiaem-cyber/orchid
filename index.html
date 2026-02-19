@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 TonKhaw Orchid - Premium Galactic Store</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SheetJS สำหรับ Export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+
+    <!-- Open Graph - รูปตอนแชร์ลิงก์ -->
+    <meta property="og:title" content="🌸 TonKhaw Orchid - กล้วยไม้เกรดพรีเมียม">
+    <meta property="og:description" content="เติมความสดชื่นให้บ้านของคุณ ">
+    <meta property="og:image" content="https://images.alphacoders.com/907/thumb-1920-907880.png">
+    <meta property="og:url" content="">
+    <meta property="og:type" content="website">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: #fff5f7;
+            scroll-behavior: smooth;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 182, 193, 0.2);
+        }
+
+        .btn-orchid {
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            color: white;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-orchid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+        }
+
+        .btn-excel {
+            background: linear-gradient(135deg, #217346 0%, #1a5c38 100%);
+            color: white;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-excel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 115, 70, 0.4);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .contact-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 500;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .contact-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .bg-line {
+            background: #00b900;
+        }
+
+        .bg-facebook {
+            background: #1877f2;
+        }
+
+        .bg-tel {
+            background: #ff4500;
+        }
+
+        #loader {
+            display: flex;
+            position: fixed;
+            inset: 0;
+            background: #fff5f7;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: 0.5s;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #ffb6c1;
+            border-top-color: #ff1493;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .banner-gradient {
+            background: linear-gradient(135deg, #ffdeeb 0%, #ffffff 100%);
+            border: 1px solid #ffe4ec;
+        }
+
+        .petal {
+            position: absolute;
+            background-color: #ffb6c1;
+            border-radius: 150% 0 150% 0;
+            opacity: 0.6;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                left: var(--start-left);
+            }
+
+            100% {
+                transform: translateY(110vh) rotate(720deg);
+                left: var(--end-left);
+            }
+        }
+
+        .kplus-badge {
+            background: linear-gradient(135deg, #00a651 0%, #007a3d 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 0.5rem 1.2rem;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .tab-active {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+        }
+
+        .tab-inactive {
+            background: white;
+            color: #9ca3af;
+            border: 2px solid #f9a8d4;
+        }
+
+        /* Excel export button pulse animation */
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(33, 115, 70, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(33, 115, 70, 0);
+            }
+        }
+
+        .btn-excel-animate {
+            animation: pulse-green 2s infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bg-animation" class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden"></div>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p class="mt-4 text-pink-500 font-bold animate-pulse text-lg">🌸 กำลังจัดเตรียมสวนกล้วยไม้...</p>
+    </div>
+
+    <div class="contact-bar">
+        <a href="https://line.me/ti/p/~YOUR_LINE_ID" target="_blank" class="contact-icon bg-line" title="Line"><i
+                class="fab fa-line"></i></a>
+        <a href="https://www.facebook.com/manita0865241800" target="_blank" class="contact-icon bg-facebook"
+            title="facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="tel:0993326442" class="contact-icon bg-tel" title="โทรหาเรา"><i class="fas fa-phone-alt"></i></a>
+    </div>
+
+    <!-- ===== LOGIN/REGISTER PAGE ===== -->
+    <section id="page-login" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="glass p-10 w-full max-w-md shadow-2xl border-2 border-white text-center">
+            <h1 class="text-5xl font-black text-pink-600 mb-2">🌸 TonKhaw</h1>
+            <p class="text-gray-400 text-sm mb-6 font-bold uppercase tracking-widest">Orchid Store</p>
+
+            <div class="flex rounded-2xl overflow-hidden mb-6 border-2 border-pink-200">
+                <button id="tab-login" onclick="switchTab('login')"
+                    class="flex-1 py-3 font-bold transition tab-active rounded-l-2xl">เข้าสู่ระบบ</button>
+                <button id="tab-register" onclick="switchTab('register')"
+                    class="flex-1 py-3 font-bold transition tab-inactive rounded-r-2xl">สมัครสมาชิก</button>
+            </div>
+
+            <div class="space-y-4">
+                <input id="auth-email" type="email" placeholder="อีเมลของคุณ"
+                    class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300">
+                <input id="auth-pass" type="password" placeholder="รหัสผ่าน"
+                    class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300">
+
+                <div id="register-fields" class="hidden space-y-4">
+                    <div class="flex gap-3">
+                        <input id="reg-firstname" type="text" placeholder="ชื่อ"
+                            class="w-1/2 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300">
+                        <input id="reg-lastname" type="text" placeholder="นามสกุล"
+                            class="w-1/2 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300">
+                    </div>
+                    <input id="reg-phone" type="tel" placeholder="เบอร์โทรศัพท์ (เช่น 0812345678)"
+                        class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300">
+                    <textarea id="reg-address"
+                        placeholder="ที่อยู่สำหรับจัดส่ง (บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์)"
+                        class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-300 h-28 resize-none"></textarea>
+                </div>
+
+                <button id="btn-submit" onclick="handleAuth('login')"
+                    class="w-full btn-orchid py-4 rounded-2xl font-bold shadow-lg text-lg">เข้าสู่สวนกล้วยไม้</button>
+            </div>
+        </div>
+    </section>
+
+    <nav id="nav-bar"
+        class="hidden sticky top-0 z-[100] bg-white/90 backdrop-blur-md border-b border-pink-100 px-6 py-4 flex flex-wrap justify-between items-center shadow-sm">
+        <h1 class="text-2xl font-black text-pink-600 cursor-pointer" onclick="showPage('home')">หน้าหลัก</h1>
+        <a class="text-1xl font-black text-pink-500 cursor-pointer"
+            onclick="showPage('care')">วิธีการดูแลรักษากล้วยไม้</a>
+        <div class="hidden md:flex gap-8 text-sm font-bold text-gray-500">
+            <a href="#section-products" class="hover:text-pink-500 transition">สินค้า</a>
+            <a href="#section-care" class="hover:text-pink-500 transition">การดูแล</a>
+            <a href="#section-about" class="hover:text-pink-500 transition">เกี่ยวกับเรา</a>
+        </div>
+        <div class="flex items-center gap-4">
+            <div id="admin-toggle-container"
+                class="hidden flex items-center gap-2 bg-pink-100 px-3 py-1 rounded-full border border-pink-200">
+                <span class="text-[10px] font-bold text-black-600">ADMIN</span>
+                <input type="checkbox" onchange="toggleAdminPage(this.checked)"
+                    class="accent-pink-500 decoration-black-500 cursor-pointer w-5 h-5">
+            </div>
+            <div class="relative cursor-pointer" onclick="toggleCart(true)">
+                <i class="fas fa-shopping-basket text-2xl text-pink-500"></i>
+                <span id="cart-count"
+                    class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">0</span>
+            </div>
+            <button onclick="showPage('profile')" class="text-gray-400 hover:text-pink-500"><i
+                    class="fas fa-user-circle text-2xl"></i></button>
+            <button onclick="logout()" class="text-pink-300 hover:text-red-500 ml-2"><i
+                    class="fas fa-power-off"></i></button>
+        </div>
+    </nav>
+
+    <main id="main-content" class="hidden container mx-auto px-4">
+
+        <section id="page-home">
+            <div
+                class="mt-8 mb-12 overflow-hidden rounded-[2.5rem] banner-gradient p-10 md:p-20 flex flex-col md:flex-row items-center justify-between">
+                <div class="max-w-lg">
+                    <span
+                        class="bg-pink-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Seasonal
+                        Sale</span>
+                    <h2 class="text-4xl md:text-6xl font-black text-gray-800 mt-6 leading-tight">กล้วยไม้เกรดพรีเมียม
+                        <br><span class="text-pink-600">ใส่ใจดูแล</span>
+                    </h2>
+                    <p class="text-gray-500 mt-4 text-lg">เติมความสดชื่นให้บ้านของคุณ </p>
+                    <a href="#section-products"
+                        class="inline-block mt-10 btn-orchid px-10 py-4 rounded-[2rem] font-bold text-lg shadow-xl">เลือกซื้อกล้วยไม้</a>
+                </div>
+                <img src="https://pbs.twimg.com/tweet_video_thumb/CeuzxqhWQAAwYXL.jpg"
+                    class="w-full md:w-1/2 rounded-3xl mt-10 md:mt-0 shadow-lg border-4 border-pink-50">
+                <h2 class="text-2xl font-bold text-pink-500 mt-6 text-center">"เพราะทุกต้นคือความรักที่เราตั้งใจดูแล"
+                </h2>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
+                <div class="relative w-full md:w-[450px]">
+                    <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                    <input type="text" id="search-input" oninput="filterProducts()"
+                        placeholder="ค้นหากล้วยไม้ที่คุณชื่นชอบ..."
+                        class="w-full pl-14 pr-6 py-4 rounded-2xl border-none ring-1 ring-pink-100 focus:ring-2 focus:ring-pink-400 outline-none shadow-sm text-lg">
+                </div>
+                <div class="flex gap-3 overflow-x-auto w-full md:w-auto pb-2 scrollbar-hide">
+                    <button onclick="filterCategory('All')"
+                        class="cat-btn px-8 py-3 rounded-full bg-pink-500 text-white font-bold text-sm shadow-md whitespace-nowrap">ทั้งหมด</button>
+                    <button onclick="filterCategory('ไม้ดอก')"
+                        class="cat-btn px-8 py-3 rounded-full bg-white text-gray-500 font-bold text-sm border hover:border-pink-300 whitespace-nowrap">ไม้ดอก</button>
+                    <button onclick="filterCategory('ไม้ใบ')"
+                        class="cat-btn px-8 py-3 rounded-full bg-white text-gray-500 font-bold text-sm border hover:border-pink-300 whitespace-nowrap">ไม้ใบ</button>
+                </div>
+            </div>
+
+            <div id="section-products">
+                <div id="product-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"></div>
+            </div>
+
+            <div id="section-care" class="mt-24 glass p-12 bg-white/40 border-none shadow-sm">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-black text-gray-800">🌱 การดูแลรักษากล้วยไม้</h2>
+                    <p class="text-gray-400 mt-2">เคล็ดลับง่ายๆ ให้กล้วยไม้ออกดอกสวยตลอดปี</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                    <div>
+                        <div
+                            class="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6 text-pink-500 text-3xl">
+                            <i class="fas fa-cloud-sun"></i></div>
+                        <h4 class="font-bold text-xl mb-3">แสงแดดที่พอเหมาะ</h4>
+                        <p class="text-sm text-gray-500">ควรได้รับแสงรำไรช่วงเช้า เลี่ยงแดดจัดโดยตรงตอนเที่ยงและบ่าย</p>
+                    </div>
+                    <div>
+                        <div
+                            class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-500 text-3xl">
+                            <i class="fas fa-droplet"></i></div>
+                        <h4 class="font-bold text-xl mb-3">การรดน้ำ</h4>
+                        <p class="text-sm text-gray-500">รดวันละ 1 ครั้ง ช่วง 6:00-8:00 น. รดให้ทั่วกระถางจนชุ่ม</p>
+                    </div>
+                    <div>
+                        <div
+                            class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 text-3xl">
+                            <i class="fas fa-wind"></i></div>
+                        <h4 class="font-bold text-xl mb-3">อากาศถ่ายเท</h4>
+                        <p class="text-sm text-gray-500">แขวนในที่ที่ลมพัดผ่านสะดวก ป้องกันการเกิดเชื้อราและโรคทางราก
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-about" class="mt-24 py-20 text-center bg-pink-50/50 rounded-[3rem]">
+                <h3 class="text-2xl font-black text-pink-600 mb-6">เกี่ยวกับเรา TonKhaw Orchid</h3>
+                <p class="text-gray-500 max-w-2xl mx-auto px-6 text-lg leading-relaxed italic">
+                    "เราคือสวนกล้วยไม้ที่ตั้งใจคัดสรรทุกต้นด้วยความรัก ส่งตรงจากสวนถึงบ้านคุณ
+                    เพื่อให้ทุกคนได้สัมผัสความงามของธรรมชาติในราคามิตรภาพ"
+                </p>
+                <div class="flex justify-center gap-8 mt-10">
+                    <i class="fab fa-instagram text-3xl text-pink-300"></i>
+                    <i class="fab fa-tiktok text-3xl text-pink-300"></i>
+                    <i class="fab fa-youtube text-3xl text-pink-300"></i>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-care" class="hidden py-10">
+            <div class="glass p-8 md:p-12 bg-white/80">
+                <h2 class="text-4xl font-black text-pink-600 mb-8 text-center">🌸 คู่มือการดูแลกล้วยไม้ฉบับมือโปร</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-pink-50 p-6 rounded-3xl border-2 border-white shadow-sm">
+                        <h3 class="text-xl font-bold text-pink-700 mb-4 flex items-center gap-2"><i
+                                class="fas fa-sun"></i> แสงแดดและสถานที่</h3>
+                        <p class="text-gray-600 leading-relaxed">กล้วยไม้ส่วนใหญ่ชอบแสงแดดรำไร (ประมาณ 50-60%)
+                            ไม่ควรวางให้โดนแดดจัดโดยตรงตอนเที่ยง เพราะจะทำให้ใบไหม้
+                            ควรแขวนไว้ใต้สแลนหรือใต้ร่มไม้ที่มีอากาศถ่ายเทสะดวก</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-3xl border-2 border-white shadow-sm">
+                        <h3 class="text-xl font-bold text-blue-600 mb-4 flex items-center gap-2"><i
+                                class="fas fa-tint"></i> การรดน้ำที่ถูกต้อง</h3>
+                        <p class="text-gray-600 leading-relaxed">ควรรดน้ำในช่วงเช้า (6.00 - 9.00 น.)
+                            รดให้ชุ่มจนน้ำไหลออกจากก้นกระถาง
+                            หลีกเลี่ยงการรดน้ำตอนเย็นเพราะอาจทำให้เกิดเชื้อราและเน่าได้ง่าย</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-3xl border-2 border-white shadow-sm">
+                        <h3 class="text-xl font-bold text-green-700 mb-4 flex items-center gap-2"><i
+                                class="fas fa-leaf"></i> การใส่ปุ๋ย</h3>
+                        <p class="text-gray-600 leading-relaxed">ใช้ปุ๋ยละลายน้ำสูตรเสมอ (เช่น 21-21-21) ฉีดพ่นสัปดาห์ละ
+                            1 ครั้งในช่วงเช้า เพื่อให้กล้วยไม้ดึงสารอาหารไปใช้ในการเจริญเติบโตและสะสมอาหารเพื่อออกดอก
+                        </p>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-3xl border-2 border-white shadow-sm">
+                        <h3 class="text-xl font-bold text-purple-700 mb-4 flex items-center gap-2"><i
+                                class="fas fa-wind"></i> อากาศและการระบาย</h3>
+                        <p class="text-gray-600 leading-relaxed">กล้วยไม้ต้องการอากาศที่ไหลเวียนได้ดี
+                            ไม่ควรแขวนติดกันจนแน่นเกินไป ความชื้นสัมพัทธ์ในอากาศควรอยู่ที่ประมาณ 60-80%
+                            จะทำให้ต้นสมบูรณ์ที่สุด</p>
+                    </div>
+                </div>
+                <div class="mt-12 text-center">
+                    <button onclick="showPage('home')"
+                        class="btn-orchid px-10 py-3 rounded-full font-bold">กลับไปเลือกซื้อสินค้า</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-admin-panel" class="hidden py-10">
+            <h2 class="text-3xl font-black mb-10 text-pink-700">⚙️ แผงควบคุมผู้ดูแล</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div class="glass p-8 shadow-xl">
+                    <h3 class="font-bold text-gray-700 mb-6 flex items-center gap-2"><i
+                            class="fas fa-plus-circle text-pink-500"></i> เพิ่มกล้วยไม้ลงร้าน</h3>
+                    <div class="space-y-4">
+                        <input id="new-p-name" placeholder="ชื่อกล้วยไม้"
+                            class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-200">
+                        <div class="flex gap-4">
+                            <input id="new-p-price" type="number" placeholder="ราคาขาย (บาท)"
+                                class="w-1/2 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-200">
+                            <input id="new-p-cost" type="number" placeholder="ต้นทุน (บาท)"
+                                class="w-1/2 p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-200">
+                        </div>
+                        <select id="new-p-cat" class="w-full p-4 border rounded-2xl outline-none bg-white">
+                            <option value="ไม้ดอก">หมวดหมู่: ไม้ดอก</option>
+                            <option value="ไม้ใบ">หมวดหมู่: ไม้ใบ</option>
+                            <option value="อื่นๆ">หมวดหมู่: วิธีการดูแล</option>
+                        </select>
+                        <input id="new-p-img" placeholder="ลิงก์รูปภาพสินค้า (URL)"
+                            class="w-full p-4 border rounded-2xl outline-none focus:ring-2 focus:ring-pink-200">
+                        <button onclick="addProduct()"
+                            class="w-full btn-orchid py-4 rounded-2xl font-bold shadow-lg text-lg mb-4">บันทึกข้อมูลสินค้า</button>
+                        <button onclick="showCustomerDashboard()"
+                            class="w-full bg-blue-500 text-white py-3 rounded-2xl font-bold hover:bg-blue-600 transition shadow-md flex items-center justify-center gap-2">
+                            <i class="fas fa-users"></i> รายชื่อลูกค้าทั้งหมด
+                        </button>
+                    </div>
+                    <div class="mt-8">
+                        <h3 class="font-bold text-gray-700 mb-6"><i class="fas fa-list-check text-pink-500"></i>
+                            ออเดอร์ที่รอจัดส่ง</h3>
+                        <div id="admin-order-list" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CUSTOMER DASHBOARD (มีปุ่ม Export Excel) ===== -->
+        <section id="page-customer-dashboard" class="hidden py-10">
+            <div class="glass p-8 max-w-6xl mx-auto bg-white shadow-2xl border-2 border-blue-50">
+                <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-100 p-3 rounded-2xl"><i class="fas fa-users text-blue-600 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-black text-blue-600">รายชื่อลูกค้า</h2>
+                            <p class="text-gray-400 text-sm">จัดการข้อมูลการซื้อและประวัติลูกค้า</p>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่ม Export Excel + ปุ่มปิด -->
+                    <div class="flex items-center gap-3">
+                        <!-- Export Dropdown -->
+                        <div class="relative" id="export-dropdown-container">
+                            <button onclick="toggleExportDropdown()"
+                                class="btn-excel btn-excel-animate px-5 py-3 rounded-2xl font-bold flex items-center gap-2 text-sm shadow-lg">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" fill="#ffffff" fill-opacity="0.2"
+                                        stroke="white" stroke-width="1.5" />
+                                    <path d="M7 8L9.5 12L7 16" stroke="white" stroke-width="1.5"
+                                        stroke-linecap="round" />
+                                    <path d="M12 16H17" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M12 12H17" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M12 8H17" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+                                </svg>
+                                Export Excel
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="export-dropdown"
+                                class="hidden absolute right-0 top-14 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 w-64">
+                                <div class="p-3 bg-green-50 border-b border-green-100">
+                                    <p class="text-xs font-black text-green-700 uppercase tracking-wider">เลือกประเภทการ
+                                        Export</p>
+                                </div>
+
+                                <button onclick="exportToExcel('summary')"
+                                    class="w-full flex items-center gap-3 px-4 py-4 hover:bg-green-50 transition text-left border-b border-gray-50">
+                                    <div
+                                        class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-user-friends text-green-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-700 text-sm">สรุปรายชื่อลูกค้า</p>
+                                        <p class="text-xs text-gray-400">อีเมล, ยอดซื้อรวม, จำนวนออเดอร์</p>
+                                    </div>
+                                </button>
+
+                                <button onclick="exportToExcel('orders')"
+                                    class="w-full flex items-center gap-3 px-4 py-4 hover:bg-blue-50 transition text-left border-b border-gray-50">
+                                    <div
+                                        class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-shopping-bag text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-700 text-sm">รายละเอียดออเดอร์ทั้งหมด</p>
+                                        <p class="text-xs text-gray-400">ทุกออเดอร์พร้อมสถานะและที่อยู่</p>
+                                    </div>
+                                </button>
+
+                                <button onclick="exportToExcel('full')"
+                                    class="w-full flex items-center gap-3 px-4 py-4 hover:bg-pink-50 transition text-left">
+                                    <div
+                                        class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-file-excel text-pink-500"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-700 text-sm">ข้อมูลครบทุก Sheet</p>
+                                        <p class="text-xs text-gray-400">สรุป + ออเดอร์ในไฟล์เดียว</p>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="showPage('admin-panel')"
+                            class="bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 w-12 h-12 rounded-2xl transition flex items-center justify-center">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div id="customer-stats" class="grid grid-cols-3 gap-4 mb-6"></div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b-2 border-blue-50 text-blue-500 font-bold">
+                                <th class="p-4">ลำดับ</th>
+                                <th class="p-4">อีเมลลูกค้า</th>
+                                <th class="p-4">จำนวนออเดอร์</th>
+                                <th class="p-4">ยอดรวมสะสม</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-list-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-profile" class="hidden max-w-2xl mx-auto py-12">
+            <div class="text-center mb-10">
+                <h3 class="text-3xl font-black text-pink-700">ติดตามพัสดุของคุณ 📦</h3>
+                <p class="text-gray-500">ตรวจสอบสถานะและรายการสั่งซื้อย้อนหลัง</p>
+            </div>
+            <div id="user-orders" class="space-y-4"></div>
+        </section>
+
+        <div id="history-modal"
+            class="fixed inset-0 z-[500] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div class="glass bg-white p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto relative">
+                <h3 id="history-title" class="text-xl font-bold text-pink-600 mb-4"></h3>
+                <div id="history-content" class="space-y-3"></div>
+                <button onclick="document.getElementById('history-modal').classList.add('hidden')"
+                    class="mt-6 w-full py-3 bg-gray-100 rounded-xl font-bold">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="cart-drawer"
+        class="fixed inset-y-0 right-0 w-80 md:w-96 glass bg-white transform translate-x-full transition-transform duration-500 z-[250] p-8 flex flex-col shadow-2xl">
+        <h3 class="text-2xl font-black text-pink-600 mb-8 border-b pb-4 flex items-center gap-2"><i
+                class="fas fa-shopping-cart"></i> ตะกร้าสินค้า</h3>
+        <div id="cart-items" class="flex-grow overflow-y-auto space-y-4"></div>
+        <div class="border-t pt-8 mt-4">
+            <div class="flex justify-between text-3xl font-black text-pink-600 mb-8"><span>รวมทั้งสิ้น:</span> <span
+                    id="cart-total">฿0</span></div>
+            <button onclick="processOrder()"
+                class="w-full btn-orchid py-5 rounded-[2rem] font-bold text-xl shadow-lg">สั่งซื้อสินค้าเลย</button>
+            <button onclick="toggleCart(false)" class="w-full text-gray-400 mt-4 font-bold">ปิดหน้าต่างนี้</button>
+        </div>
+    </div>
+    <div id="overlay" onclick="toggleCart(false)" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden z-[240]">
+    </div>
+
+    <!-- ===== QR / PAYMENT MODAL ===== -->
+    <div id="qr-modal"
+        class="fixed inset-0 z-[300] hidden flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+        <div class="glass bg-white p-8 max-w-md w-full text-center shadow-2xl rounded-3xl">
+            <div class="mb-4">
+                <span class="kplus-badge text-lg mb-2 inline-flex">
+                    <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="64" height="64" rx="14" fill="#00a651" />
+                        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="32"
+                            font-weight="900" fill="white" font-family="Arial">K</text>
+                    </svg>
+                    K PLUS
+                </span>
+                <p class="text-5xl font-black text-pink-600 mt-2" id="qr-amt">฿0</p>
+                <p class="text-gray-400 text-sm mt-1">สแกน QR เพื่อชำระเงิน</p>
+            </div>
+
+            <img id="qr-img" src="image/tk.jpg"
+                class="w-56 h-56 mx-auto mb-4 rounded-3xl border-4 border-pink-50 shadow-inner">
+
+            <div class="bg-pink-50 rounded-2xl p-4 text-left mb-4 border border-pink-100">
+                <p class="text-[10px] font-black text-pink-400 uppercase mb-2 text-center">📦 ที่อยู่จัดส่ง
+                    (จากบัญชีของคุณ)</p>
+                <p id="display-name" class="font-bold text-gray-700 text-sm"></p>
+                <p id="display-phone" class="text-gray-500 text-xs mt-1"></p>
+                <p id="display-address" class="text-gray-500 text-xs mt-1 leading-relaxed"></p>
+                <button onclick="showPage('profile'); document.getElementById('qr-modal').classList.add('hidden')"
+                    class="text-pink-400 text-xs underline mt-2 block">แก้ไขที่อยู่</button>
+            </div>
+
+            <div class="p-4 bg-green-50 rounded-2xl border-2 border-dashed border-green-300 mb-6">
+                <p class="text-[10px] font-black text-green-600 mb-2 uppercase text-center">
+                    📎 แนบหลักฐานการโอนเงิน (สลิป K PLUS)
+                </p>
+                <input type="file" id="slip-upload" accept="image/*" class="w-full text-xs text-gray-600">
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="confirmOrder()" class="flex-grow btn-orchid py-4 rounded-2xl font-bold text-lg">✅
+                    ยืนยันการโอน</button>
+                <button onclick="document.getElementById('qr-modal').classList.add('hidden')"
+                    class="px-6 py-4 text-gray-400 font-bold">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GLOBAL DATA STORE (สำหรับ export) =====
+        let globalCustomerData = {};
+        let globalOrdersData = {};
+
+        function switchTab(tab) {
+            const registerFields = document.getElementById('register-fields');
+            const btnSubmit = document.getElementById('btn-submit');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+
+            if (tab === 'login') {
+                registerFields.classList.add('hidden');
+                btnSubmit.textContent = 'เข้าสู่สวนกล้วยไม้';
+                btnSubmit.onclick = () => handleAuth('login');
+                tabLogin.className = 'flex-1 py-3 font-bold transition tab-active rounded-l-2xl';
+                tabRegister.className = 'flex-1 py-3 font-bold transition tab-inactive rounded-r-2xl';
+            } else {
+                registerFields.classList.remove('hidden');
+                btnSubmit.textContent = 'สมัครสมาชิกใหม่';
+                btnSubmit.onclick = () => handleAuth('register');
+                tabLogin.className = 'flex-1 py-3 font-bold transition tab-inactive rounded-l-2xl';
+                tabRegister.className = 'flex-1 py-3 font-bold transition tab-active rounded-r-2xl';
+            }
+        }
+
+        function createPetals() {
+            const container = document.getElementById('bg-animation');
+            for (let i = 0; i < 25; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                const size = Math.random() * 15 + 10 + 'px';
+                const startLeft = Math.random() * 100 + 'vw';
+                const endLeft = (Math.random() * 20 - 10) + parseFloat(startLeft) + 'vw';
+                petal.style.width = size;
+                petal.style.height = size;
+                petal.style.setProperty('--start-left', startLeft);
+                petal.style.setProperty('--end-left', endLeft);
+                petal.style.animationDuration = Math.random() * 5 + 5 + 's';
+                petal.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(petal);
+            }
+        }
+        window.addEventListener('load', createPetals);
+
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDf5u1YD1ZW9_jeXL9OsmgicSoOyraRTFg",
+            authDomain: "meow-shop-ce9b0.firebaseapp.com",
+            databaseURL: "https://meow-shop-ce9b0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "meow-shop-ce9b0",
+            storageBucket: "meow-shop-ce9b0.firebasestorage.app",
+            messagingSenderId: "102243975212",
+            appId: "1:102243975212:web:8b4b647f8cb1bcd823d189",
+            measurementId: "G-6MEK2YJBCZ"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database(), auth = firebase.auth();
+
+        let currentUser = null, cart = [], products = [], currentCategory = 'All';
+        let userProfile = {};
+
+        // --- AUTH ---
+        async function handleAuth(type) {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if (!email || !pass) return alert("กรุณาระบุอีเมลและรหัสผ่าน");
+
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                if (type === 'register') {
+                    const firstname = document.getElementById('reg-firstname').value.trim();
+                    const lastname = document.getElementById('reg-lastname').value.trim();
+                    const phone = document.getElementById('reg-phone').value.trim();
+                    const address = document.getElementById('reg-address').value.trim();
+
+                    if (!firstname || !lastname || !phone || !address) {
+                        document.getElementById('loader').style.display = 'none';
+                        return alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (ชื่อ, นามสกุล, เบอร์โทร, ที่อยู่)");
+                    }
+                    const res = await auth.createUserWithEmailAndPassword(email, pass);
+                    await db.ref('users/' + res.user.uid).set({ email, role: 'customer', firstname, lastname, phone, address });
+                } else {
+                    await auth.signInWithEmailAndPassword(email, pass);
+                }
+            } catch (err) {
+                alert("ล้มเหลว: " + err.message);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        auth.onAuthStateChanged(user => {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 500);
+
+            if (user) {
+                currentUser = user.uid;
+                document.getElementById('page-login').classList.add('hidden');
+                document.getElementById('nav-bar').classList.remove('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+
+                db.ref('users/' + user.uid).once('value', snap => {
+                    const data = snap.val();
+                    if (data) {
+                        userProfile = data;
+                        if (data.role === 'admin') document.getElementById('admin-toggle-container').classList.remove('hidden');
+                    }
+                });
+
+                loadProducts(); loadUserOrders(); loadAdminData(); showPage('home');
+            } else {
+                currentUser = null; userProfile = {};
+                document.getElementById('page-login').classList.remove('hidden');
+                document.getElementById('nav-bar').classList.add('hidden');
+                document.getElementById('main-content').classList.add('hidden');
+            }
+        });
+
+        // --- PRODUCTS ---
+        function loadProducts() {
+            db.ref('orchid_products').on('value', snap => {
+                products = [];
+                snap.forEach(c => { products.push({ id: c.key, ...c.val() }); });
+                filterProducts();
+            });
+        }
+
+        function filterProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = products.filter(p =>
+                (currentCategory === 'All' || p.category === currentCategory) &&
+                p.name.toLowerCase().includes(query)
+            );
+            renderProducts(filtered);
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.replace('bg-pink-500', 'bg-white');
+                btn.classList.replace('text-white', 'text-gray-500');
+                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'ทั้งหมด')) {
+                    btn.classList.replace('bg-white', 'bg-pink-500');
+                    btn.classList.replace('text-gray-500', 'text-white');
+                }
+            });
+            filterProducts();
+        }
+
+        function renderProducts(data) {
+            let html = '';
+            const isAdmin = !document.getElementById('admin-toggle-container').classList.contains('hidden');
+            data.forEach(p => {
+                html += `
+                <div class="glass p-5 bg-white relative group border-2 border-transparent hover:border-pink-300 transition-all shadow-sm">
+                    ${isAdmin ? `<button onclick="deleteProduct('${p.id}')" class="absolute top-3 right-3 text-red-400 z-10 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>` : ''}
+                    <div class="overflow-hidden rounded-2xl mb-4">
+                        <img src="${p.img || 'https://placehold.co/400'}" class="w-full h-52 object-cover group-hover:scale-110 transition-transform duration-500">
+                    </div>
+                    <span class="text-[10px] bg-pink-100 text-pink-500 px-3 py-1 rounded-full font-black uppercase">${p.category || 'ไม้ดอก'}</span>
+                    <h4 class="font-bold text-gray-800 mt-3 text-lg truncate">${p.name}</h4>
+                    <div class="flex justify-between items-center mt-4">
+                        <p class="text-3xl font-black text-pink-600">฿${p.price}</p>
+                        <button onclick="addToCart('${p.id}')" class="w-12 h-12 btn-orchid rounded-full shadow-lg flex items-center justify-center"><i class="fas fa-cart-plus"></i></button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('product-list-container').innerHTML = html || '<p class="col-span-full text-center py-20 text-gray-400 italic">ไม่พบกล้วยไม้ที่คุณหา...</p>';
+        }
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            const index = cart.findIndex(i => i.id === id);
+            index > -1 ? cart[index].qty++ : cart.push({ ...p, qty: 1 });
+            updateCartUI(); toggleCart(true);
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cart-total').innerText = `฿${cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0)}`;
+            document.getElementById('cart-items').innerHTML = cart.map((i, idx) => `
+                <div class="flex justify-between items-center p-4 bg-pink-50/50 rounded-2xl border border-pink-100">
+                    <div class="flex-grow">
+                        <p class="font-bold text-gray-800 text-sm truncate w-40">${i.name}</p>
+                        <p class="text-pink-500 font-bold">฿${i.price} x ${i.qty}</p>
+                    </div>
+                    <button onclick="cart.splice(${idx},1);updateCartUI()" class="text-pink-300 hover:text-red-500 p-2"><i class="fas fa-times-circle text-xl"></i></button>
+                </div>`).join('');
+        }
+
+        function processOrder() {
+            const total = cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0);
+            if (total <= 0) return alert("ตะกร้ายังว่างอยู่เลย");
+            if (!userProfile.address) {
+                alert("กรุณาอัพเดทที่อยู่จัดส่งในโปรไฟล์ของคุณก่อนนะคะ");
+                showPage('profile'); toggleCart(false); return;
+            }
+
+            document.getElementById('qr-amt').innerText = `฿${total.toLocaleString()}`;
+            document.getElementById('qr-img').src = `https://scontent.fkdt1-1.fna.fbcdn.net/v/t1.15752-9/639506106_2131175254321968_7914892931118089814_n.png?stp=dst-png_p480x480&_nc_cat=111&ccb=1-7&_nc_sid=0024fc&_nc_ohc=hyoHHpggiNgQ7kNvwETQ95D&_nc_oc=Adk1JOwWljsZGJi9-nsqxg5YujhhogpjR2rhJC45JcZWUfWPbnv5a2-EHDqlmHINU70IskxwIEWCOOAu7xS9zjjU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent.fkdt1-1.fna&oh=03_Q7cD4gH1LRLmwI6JMFladrCw2DUu6td7s3uVJxQwSDGPu7nTQA&oe=69BE2294`;
+
+            const fullName = (userProfile.firstname || '') + ' ' + (userProfile.lastname || '');
+            document.getElementById('display-name').innerText = '👤 ' + (fullName.trim() || userProfile.email || '-');
+            document.getElementById('display-phone').innerText = '📞 ' + (userProfile.phone || '-');
+            document.getElementById('display-address').innerText = '📍 ' + (userProfile.address || '-');
+            document.getElementById('slip-upload').value = '';
+
+            document.getElementById('qr-modal').classList.remove('hidden');
+            toggleCart(false);
+        }
+
+        async function confirmOrder() {
+            const file = document.getElementById('slip-upload').files[0];
+            if (!file) return alert("กรุณาแนบสลิปการโอนเงินด้วยนะคะ 📎");
+
+            const fullName = (userProfile.firstname || '') + ' ' + (userProfile.lastname || '');
+            const name = fullName.trim() || userProfile.email || 'ไม่ระบุ';
+            const addr = userProfile.address || 'ไม่ระบุ';
+            const phone = userProfile.phone || 'ไม่ระบุ';
+
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                const base64 = await compressImage(file);
+                await db.ref('orchid_orders').push({
+                    uid: currentUser,
+                    userEmail: userProfile.email || '',
+                    items: cart.map(i => `${i.name}(x${i.qty})`).join(', '),
+                    total: cart.reduce((s, i) => s + (Number(i.price) * i.qty), 0),
+                    status: 'รอตรวจสอบ',
+                    slip: base64,
+                    address: { name, addr, phone },
+                    time: Date.now()
+                });
+                alert("รับออเดอร์เรียบร้อย! ขอบคุณที่อุดหนุนครับ 🌸");
+                cart = []; updateCartUI();
+                document.getElementById('qr-modal').classList.add('hidden');
+                showPage('profile');
+            } catch (e) { alert(e.message); }
+            finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX = 800; let w = img.width, h = img.height;
+                        if (w > MAX) { h *= MAX / w; w = MAX; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    }
+                }
+            });
+        }
+
+        function showPage(pageId) {
+            ['page-home', 'page-care', 'page-admin-panel', 'page-profile', 'page-customer-dashboard'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.remove('hidden');
+        }
+
+        function toggleAdminPage(chk) { chk ? showPage('admin-panel') : showPage('home'); }
+
+        function toggleCart(show) {
+            const d = document.getElementById('cart-drawer'), o = document.getElementById('overlay');
+            show ? (d.classList.remove('translate-x-full'), o.classList.remove('hidden')) : (d.classList.add('translate-x-full'), o.classList.add('hidden'));
+        }
+
+        function logout() { if (confirm('ต้องการออกจากระบบ?')) auth.signOut().then(() => location.reload()); }
+
+        async function addProduct() {
+            const name = document.getElementById('new-p-name').value;
+            const price = document.getElementById('new-p-price').value;
+            const cost = document.getElementById('new-p-cost').value;
+            const cat = document.getElementById('new-p-cat').value;
+            const img = document.getElementById('new-p-img').value;
+            if (!name || !price) return alert("กรุณาใส่ชื่อและราคาขาย");
+            await db.ref('orchid_products').push({ name, price: Number(price), cost: Number(cost || 0), category: cat, img: img || 'https://placehold.co/400' });
+            alert("เพิ่มสินค้าสำเร็จ!");
+            document.querySelectorAll('#page-admin-panel input').forEach(i => i.value = '');
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('ต้องการลบสินค้านี้ใช่ไหม?')) await db.ref('orchid_products/' + id).remove();
+        }
+
+        function loadUserOrders() {
+            db.ref('orchid_orders').orderByChild('uid').equalTo(currentUser).on('value', snap => {
+                const list = document.getElementById('user-orders');
+                list.innerHTML = '';
+                snap.forEach(c => {
+                    const o = c.val();
+                    list.innerHTML += `<div class="glass p-6 bg-white border-l-8 border-pink-500 shadow-md">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black bg-pink-100 text-pink-500 px-3 py-1 rounded-full uppercase">${o.status}</span>
+                            <span class="text-xs text-gray-400">${new Date(o.time).toLocaleDateString('th-TH')}</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 mb-1">${o.items}</h4>
+                        <p class="text-3xl font-black text-pink-600">฿${o.total.toLocaleString()}</p>
+                        <p class="text-xs text-gray-400 mt-2">📍 ${o.address?.addr || ''}</p>
+                    </div>`;
+                });
+            });
+        }
+
+        function loadAdminData() {
+            db.ref('orchid_orders').on('value', snap => {
+                const list = document.getElementById('admin-order-list');
+                list.innerHTML = '';
+                const orders = [];
+                snap.forEach(c => { orders.unshift({ key: c.key, ...c.val() }); });
+                orders.forEach(o => {
+                    if (o.status !== 'ส่งแล้ว') {
+                        list.innerHTML += `
+                <div class="glass p-5 bg-white border border-pink-100 shadow-sm hover:shadow-md transition-all">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative group cursor-pointer w-full md:w-32 h-40" onclick="viewSlip('${o.slip}')">
+                            <img src="${o.slip}" class="w-full h-full object-cover rounded-xl border-2 border-pink-50 shadow-inner">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded-xl transition">
+                                <span class="text-white text-xs font-bold"><i class="fas fa-search-plus"></i> กดดูสลิป</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow space-y-2">
+                            <div class="flex justify-between items-start">
+                                <p class="text-2xl font-black text-pink-600">฿${o.total.toLocaleString()}</p>
+                                <span class="bg-yellow-100 text-yellow-600 text-[10px] px-2 py-1 rounded-full font-bold">${o.status}</span>
+                            </div>
+                            <p class="font-bold text-gray-700 text-sm"><i class="fas fa-user text-pink-300 mr-2"></i>${o.address?.name || ''}</p>
+                            <p class="text-gray-500 text-xs"><i class="fas fa-phone text-pink-300 mr-2"></i>${o.address?.phone || ''}</p>
+                            <p class="text-gray-500 text-xs leading-relaxed"><i class="fas fa-map-marker-alt text-pink-300 mr-2"></i>${o.address?.addr || ''}</p>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">รายการสินค้า:</p>
+                                <p class="text-xs text-gray-600">${o.items}</p>
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button onclick="db.ref('orchid_orders/${o.key}').update({status:'ส่งแล้ว'})"
+                                    class="flex-grow bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-xs transition shadow-sm">
+                                    <i class="fas fa-check-circle mr-1"></i> ยืนยันการส่งของ
+                                </button>
+                                <button onclick="if(confirm('ยกเลิกออเดอร์นี้?')) db.ref('orchid_orders/${o.key}').remove()"
+                                    class="bg-red-50 text-red-400 px-4 py-2 rounded-xl hover:bg-red-100 transition text-xs">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                    }
+                });
+            });
+        }
+
+        function viewSlip(url) {
+            document.getElementById('full-slip-img').src = url;
+            document.getElementById('slip-viewer-modal').classList.remove('hidden');
+        }
+
+        // ===== CUSTOMER DASHBOARD =====
+        async function showCustomerDashboard() {
+            showPage('customer-dashboard');
+            const body = document.getElementById('customer-list-body');
+            const stats = document.getElementById('customer-stats');
+            body.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-400 animate-pulse">กำลังโหลดรายชื่อลูกค้า...</td></tr>';
+            stats.innerHTML = '';
+
+            db.ref('orchid_orders').once('value', (snapshot) => {
+                const orders = snapshot.val();
+
+                if (!orders) {
+                    body.innerHTML = '<tr><td colspan="5" class="p-10 text-center text-gray-400">ยังไม่มีข้อมูลการซื้อ</td></tr>';
+                    return;
+                }
+
+                // สร้าง summary ต่อ email
+                const summary = {};
+                const allOrders = Object.entries(orders).map(([key, val]) => ({ key, ...val }));
+
+                allOrders.forEach(o => {
+                    const email = o.userEmail || 'ไม่ระบุอีเมล';
+                    if (!summary[email]) summary[email] = { total: 0, items: [], count: 0 };
+                    summary[email].total += Number(o.total || 0);
+                    summary[email].items.push(o);
+                    summary[email].count++;
+                });
+
+                // เก็บข้อมูลไว้ global สำหรับ export
+                globalCustomerData = summary;
+                globalOrdersData = allOrders;
+
+                // Stats bar
+                const totalCustomers = Object.keys(summary).length;
+                const totalRevenue = allOrders.reduce((s, o) => s + Number(o.total || 0), 0);
+                const totalOrders = allOrders.length;
+
+                stats.innerHTML = `
+                    <div class="bg-blue-50 rounded-2xl p-4 text-center border border-blue-100">
+                        <p class="text-3xl font-black text-blue-600">${totalCustomers}</p>
+                        <p class="text-xs text-gray-400 font-bold mt-1">ลูกค้าทั้งหมด</p>
+                    </div>
+                    <div class="bg-pink-50 rounded-2xl p-4 text-center border border-pink-100">
+                        <p class="text-3xl font-black text-pink-600">${totalOrders}</p>
+                        <p class="text-xs text-gray-400 font-bold mt-1">ออเดอร์ทั้งหมด</p>
+                    </div>
+                    <div class="bg-green-50 rounded-2xl p-4 text-center border border-green-100">
+                        <p class="text-2xl font-black text-green-600">฿${totalRevenue.toLocaleString()}</p>
+                        <p class="text-xs text-gray-400 font-bold mt-1">ยอดขายรวม</p>
+                    </div>`;
+
+                // แสดงตาราง
+                body.innerHTML = '';
+                Object.keys(summary).forEach((email, index) => {
+                    const d = summary[email];
+                    body.innerHTML += `
+                <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
+                    <td class="p-4 font-bold text-gray-600">${index + 1}</td>
+                    <td class="p-4 text-blue-600 font-medium">${email}</td>
+                    <td class="p-4 text-gray-500 text-center">${d.count} ออเดอร์</td>
+                    <td class="p-4 text-pink-500 font-bold">฿${d.total.toLocaleString()}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="viewUserHistory('${email}', ${JSON.stringify(d.items).replace(/"/g, '&quot;')})"
+                            class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold">
+                            <i class="fas fa-history mr-1"></i>ประวัติ
+                        </button>
+                    </td>
+                </tr>`;
+                });
+            });
+        }
+
+        // ===== TOGGLE EXPORT DROPDOWN =====
+        function toggleExportDropdown() {
+            const dd = document.getElementById('export-dropdown');
+            dd.classList.toggle('hidden');
+        }
+
+        // ปิด dropdown เมื่อคลิกข้างนอก
+        document.addEventListener('click', function (e) {
+            const container = document.getElementById('export-dropdown-container');
+            if (container && !container.contains(e.target)) {
+                document.getElementById('export-dropdown')?.classList.add('hidden');
+            }
+        });
+
+        // ===== EXCEL EXPORT FUNCTION =====
+        function exportToExcel(type) {
+            document.getElementById('export-dropdown').classList.add('hidden');
+
+            if (Object.keys(globalCustomerData).length === 0) {
+                alert("ไม่มีข้อมูลสำหรับ Export");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: '2-digit', day: '2-digit' })
+                .replace(/\//g, '-');
+
+            // ===== SHEET 1: สรุปลูกค้า =====
+            if (type === 'summary' || type === 'full') {
+                const summaryRows = [
+                    // Header Row
+                    ['ลำดับ', 'อีเมลลูกค้า', 'จำนวนออเดอร์', 'ยอดซื้อรวม (บาท)', 'ออเดอร์ล่าสุด']
+                ];
+
+                Object.keys(globalCustomerData).forEach((email, idx) => {
+                    const d = globalCustomerData[email];
+                    const latestOrder = d.items.reduce((a, b) => (a.time > b.time ? a : b));
+                    const latestDate = new Date(latestOrder.time).toLocaleString('th-TH');
+                    summaryRows.push([
+                        idx + 1,
+                        email,
+                        d.count,
+                        d.total,
+                        latestDate
+                    ]);
+                });
+
+                // สรุปท้าย
+                summaryRows.push([]);
+                summaryRows.push(['', 'รวมทั้งหมด',
+                    Object.values(globalCustomerData).reduce((s, d) => s + d.count, 0),
+                    Object.values(globalCustomerData).reduce((s, d) => s + d.total, 0),
+                    ''
+                ]);
+
+                const ws1 = XLSX.utils.aoa_to_sheet(summaryRows);
+
+                // กำหนดความกว้างคอลัมน์
+                ws1['!cols'] = [
+                    { wch: 8 },   // ลำดับ
+                    { wch: 35 },  // อีเมล
+                    { wch: 15 },  // จำนวนออเดอร์
+                    { wch: 20 },  // ยอดซื้อรวม
+                    { wch: 25 },  // วันล่าสุด
+                ];
+
+                XLSX.utils.book_append_sheet(wb, ws1, 'สรุปลูกค้า');
+            }
+
+            // ===== SHEET 2: รายละเอียดออเดอร์ทั้งหมด =====
+            if (type === 'orders' || type === 'full') {
+                const orderRows = [
+                    ['ลำดับ', 'อีเมลลูกค้า', 'ชื่อผู้รับ', 'เบอร์โทร', 'ที่อยู่จัดส่ง', 'รายการสินค้า', 'ยอดรวม (บาท)', 'สถานะ', 'วันที่สั่ง']
+                ];
+
+                globalOrdersData
+                    .sort((a, b) => b.time - a.time) // เรียงจากใหม่ไปเก่า
+                    .forEach((o, idx) => {
+                        orderRows.push([
+                            idx + 1,
+                            o.userEmail || 'ไม่ระบุ',
+                            o.address?.name || 'ไม่ระบุ',
+                            o.address?.phone || 'ไม่ระบุ',
+                            o.address?.addr || 'ไม่ระบุ',
+                            o.items || '',
+                            Number(o.total || 0),
+                            o.status || 'ไม่ระบุ',
+                            new Date(o.time).toLocaleString('th-TH')
+                        ]);
+                    });
+
+                const ws2 = XLSX.utils.aoa_to_sheet(orderRows);
+                ws2['!cols'] = [
+                    { wch: 8 },
+                    { wch: 35 },
+                    { wch: 20 },
+                    { wch: 15 },
+                    { wch: 40 },
+                    { wch: 40 },
+                    { wch: 18 },
+                    { wch: 15 },
+                    { wch: 25 },
+                ];
+
+                XLSX.utils.book_append_sheet(wb, ws2, 'ออเดอร์ทั้งหมด');
+            }
+
+            // บันทึกไฟล์
+            const fileName = `TonKhaw_Orchid_${type === 'summary' ? 'ลูกค้า' : type === 'orders' ? 'ออเดอร์' : 'รายงานครบ'}_${dateStr}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+
+            // แสดง toast แจ้งเตือน
+            showToast(`✅ Export สำเร็จ! ดาวน์โหลดแล้ว: ${fileName}`);
+        }
+
+        // ===== TOAST NOTIFICATION =====
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 right-6 z-[9999] bg-green-600 text-white px-6 py-4 rounded-2xl shadow-2xl font-bold text-sm flex items-center gap-3 transform translate-y-20 opacity-0 transition-all duration-500';
+            toast.innerHTML = `<i class="fas fa-check-circle text-xl"></i><span>${msg}</span>`;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            });
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(20px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        function viewUserHistory(email, items) {
+            document.getElementById('history-title').innerText = `ประวัติการซื้อ: ${email}`;
+            document.getElementById('history-content').innerHTML = items.map(o => `
+        <div class="p-3 bg-pink-50 rounded-lg border border-pink-100">
+            <p class="text-xs text-gray-400">${new Date(o.time).toLocaleString('th-TH')}</p>
+            <p class="font-bold text-gray-700">${o.items}</p>
+            <p class="text-pink-600 font-bold">฿${o.total.toLocaleString()}</p>
+            <span class="text-xs bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">${o.status}</span>
+        </div>`).join('');
+            document.getElementById('history-modal').classList.remove('hidden');
+        }
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
+            });
+        });
+        // ป้องกันการคลิกขวา
+document.addEventListener('contextmenu', event => event.preventDefault());
+
+// ป้องกันการกด F12 และปุ่มลัดตรวจโค้ด
+document.onkeydown = function(e) {
+    if (e.keyCode == 123 || 
+        (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) || 
+        (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) || 
+        (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) || 
+        (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
+        return false;
+    }
+}
+    </script>
+
+    <div id="slip-viewer-modal"
+        class="fixed inset-0 z-[400] hidden flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        onclick="this.classList.add('hidden')">
+        <div class="relative max-w-lg w-full">
+            <img id="full-slip-img" src="" class="w-full rounded-2xl shadow-2xl border-4 border-white">
+            <button class="absolute -top-10 right-0 text-white text-2xl font-bold"><i class="fas fa-times"></i>
+                ปิดหน้าต่าง</button>
+        </div>
+    </div>
+</body>
+
+</html>
